@@ -2,19 +2,9 @@
 /** @jsx jsx */
 import { jsx } from '@emotion/core';
 import { Builder } from '@builder.io/react';
-import ReactQuill from 'react-quill';
 
 
-function RichTextEditor(props) {
-  return (
-    <ReactQuill
-      value={props.value}
-      onChange={props.onChange}
-    />
-  );
-}
-
-function CmsLink(props) {
+function ComplexLink(props) {
     return (
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '8px', alignItems: 'center' }}>
             <label style={{ gridColumn: '1 / 2' }}>
@@ -30,6 +20,6 @@ function CmsLink(props) {
 }
 
 Builder.registerEditor({
-    name: 'CmsLink',
-    component: CmsLink,
+    name: 'ComplexLink',
+    component: ComplexLink,
 });

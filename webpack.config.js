@@ -17,18 +17,16 @@ module.exports = {
     libraryTarget: 'system',
   },
   resolve: {
-    extensions: ['.js', '.jsx'],
+    extensions: ['.js', '.jsx','.tsx','.ts'],
   },
   module: {
     rules: [
         {
-            test: /\.(jsx)$/,
+            test: /\.(tsx|ts|jsx|js)$/,
             exclude: /node_modules/,
-            use: [
-              {
-                loader: 'babel-loader',
-              },
-            ],
+            use: {
+              loader: 'babel-loader'
+            }
           },
         ],
   },

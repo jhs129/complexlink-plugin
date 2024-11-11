@@ -14,11 +14,14 @@ const ComplexLink: React.FC<ComplexLinkProps> = (props) => {
     return (
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '8px', alignItems: 'center' }}>
             <label style={{ gridColumn: '1 / 2' }}>
-                My First Input:
+                Type:
             </label>
-            <input style={{ gridColumn: '2 / 3' }} type="text" value={props.value} onChange={handleChange} />
+            <select style={{ gridColumn: '2 / 3' }}>
+                <option value="model">Model</option>
+                <option value="url">URL</option>
+            </select>
             <label style={{ gridColumn: '1 / 2' }}>
-                Second Input:
+                Input 2:
             </label>
             <input style={{ gridColumn: '2 / 3' }} type="text" value={props.value} onChange={handleChange} />
         </div>

@@ -1,19 +1,30 @@
 import React, { useState, ChangeEvent, FC } from 'react';
 
 interface ComplexLinkProps {
-    value: string;
-    onChange: (value: string) => void;
+    value: {
+        value1: string;
+        value2: string;
+    }
+    onChange: (value: { value1: string; value2: string }) => void;
 }
 
 const ComplexLink: React.FC<ComplexLinkProps> = (props) => {
     const [type, setType] = useState('model');
+    const [state, setState] = useState(props.value);
 
     const handleTypeChange = (e: ChangeEvent<HTMLSelectElement>) => {
         setType(e.target.value);
     };
 
-    const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-        props.onChange(e.target.value);
+    const handleOnChange = (e: ChangeEvent<HTMLInputElement>) => {
+        const newValue = {
+            ...state,
+            value1: e.target.value,
+            value2: e.target.value
+        };
+        setState(newValue);
+        props.onChange(newValue);
+
     };
 
     return (
@@ -30,7 +41,7 @@ const ComplexLink: React.FC<ComplexLinkProps> = (props) => {
                     <label style={{ gridColumn: '1 / 2' }}>
                         Enter Url:
                     </label>
-                    <input id="link" style={{ gridColumn: '2 / 3' }} type="text" value={props.value} onChange={handleChange} />
+                    <input id="link" style={{ gridColumn: '2 / 3' }} type="text" value={props.value.value1} onChange={handleOnChange} />
                 </>
             )}
         </div>

@@ -3,7 +3,7 @@ const path = require('path');
 const pkg = require('./package.json');
 
 module.exports = {
-  entry: `./src/${pkg.entry}.jsx`,
+  entry: `./src/${pkg.entry}.tsx`,
   externals: {
     '@builder.io/react': '@builder.io/react',
     '@builder.io/app-context': '@builder.io/app-context',

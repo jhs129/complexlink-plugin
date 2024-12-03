@@ -2,7 +2,7 @@ import { jsx } from "@emotion/react";
 import React, { useState, ChangeEvent, FC } from 'react';
 import { Builder } from "@builder.io/react";
 import ComplexLink from "./complexlink";
-import { IComplexLink } from "./icomplexlink";
+
 
 // interface Props {
 //   value?: any;

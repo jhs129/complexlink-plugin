@@ -1,47 +1,33 @@
-import React, { useState, ChangeEvent, FC } from 'react';
+import React, { useState, ChangeEvent } from 'react';
 
 interface ComplexLinkProps {
-    value: {
-        value1: string;
-        value2: string;
-    }
-    onChange: (value: { value1: string; value2: string }) => void;
+    value: string;
+    onChange: (value: string) => void;
+    defaultType?: string;
 }
 
-const ComplexLink: React.FC<ComplexLinkProps> = (props) => {
-    const [type, setType] = useState('model');
-    const [state, setState] = useState(props.value);
+const ComplexLink: React.FC<ComplexLinkProps> = ({ value, onChange, defaultType = 'model' }) => {
+    const [type, setType] = useState(defaultType);
 
     const handleTypeChange = (e: ChangeEvent<HTMLSelectElement>) => {
         setType(e.target.value);
     };
 
-    const handleOnChange = (e: ChangeEvent<HTMLInputElement>) => {
-        const newValue = {
-            ...state,
-            value1: e.target.value,
-            value2: e.target.value
-        };
-        setState(newValue);
-        props.onChange(newValue);
-
+    const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+        onChange(e.target.value);
     };
 
     return (
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '8px', alignItems: 'center' }}>
-            <label style={{ gridColumn: '1 / 2' }}>
-                Link Type:
-            </label>
-            <select id="type" style={{ gridColumn: '2 / 3' }} value={type} onChange={handleTypeChange}>
+            <label htmlFor="type">Link Type:</label>
+            <select id="type" value={type} onChange={handleTypeChange}>
                 <option value="model">Model</option>
                 <option value="url">URL</option>
             </select>
             {type === 'url' && (
                 <>
-                    <label style={{ gridColumn: '1 / 2' }}>
-                        Enter Url:
-                    </label>
-                    <input id="link" style={{ gridColumn: '2 / 3' }} type="text" value={props.value.value1} onChange={handleOnChange} />
+                    <label htmlFor="link">Enter Url:</label>
+                    <input id="link" type="text" value={value} onChange={handleChange} />
                 </>
             )}
         </div>

@@ -1,7 +1,7 @@
 {
   "name": "cms-link-plugin",
   "version": "1.0.0",
-  "description": "",
+  "description": "complex link plugin",
   "entry": "plugin",
   "output": "plugin.system.js",
   "main": "dist/plugin.system.js",
@@ -28,6 +28,7 @@
     "webpack-dev-server": "^4.10.0"
   },
   "dependencies": {
+    "@emotion/react": "^11.13.3",
     "react-quill": "^2.0.0"
   }
 }

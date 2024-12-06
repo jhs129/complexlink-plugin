@@ -15,11 +15,21 @@ const ComplexLink: React.FC<ComplexLinkProps> = ({ value, onChange, defaultType 
     const handleTypeChange = (e: ChangeEvent<HTMLSelectElement>) => {
         const newType = e.target.value;
         setType(newType);
-        onChange({ ...value, type: newType });
+        
+        try {
+            onChange({ link: value.link, type: newType });
+        } catch (error) {
+            console.error('Error updating type:', error);
+        }
     };
 
     const handleLinkChange = (e: ChangeEvent<HTMLInputElement>) => {
-        onChange({ ...value, link: e.target.value });
+        
+        try {
+            onChange({ ...value, link: e.target.value });
+        } catch (error) {
+            console.error('Error updating link:', error);
+        }
     };
 
     return (

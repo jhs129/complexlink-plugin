@@ -1,7 +1,7 @@
 {
   "name": "cms-link-plugin",
   "version": "1.0.0",
-  "description": "",
+  "description": "complex link plugin",
   "entry": "plugin",
   "output": "plugin.system.js",
   "main": "dist/plugin.system.js",

@@ -93,3 +93,11 @@ Builder.registerEditor({
   name: "ComplexLink",
   component: ComplexLink,
 });
+
+function handleErrors(response: any) {
+  if (!response.ok) {
+    throw Error(
+      "custon error" + response.statusText);
+  }
+  return response;
+}

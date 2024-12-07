@@ -9,32 +9,42 @@ interface ComplexLinkProps {
     defaultType?: string;
 }
 
-const ComplexLink: React.FC<ComplexLinkProps> = ({ value, onChange, defaultType = 'model' }) => {
-    const [type, setType] = useState(value?.type || defaultType);
-    const [link, setLink] = useState(value?.link || '');
+const ComplexLink: React.FC<ComplexLinkProps> = ({ value, onChange, defaultType = 'url' }) => {
+    // Initialize state directly from value prop
+    const [type, setType] = useState<string>('url'); // Changed default to 'url'
+    const [link, setLink] = useState<string>(''); // Default initialization
     const [error, setError] = useState<string | null>(null);
     const [debugInfo, setDebugInfo] = useState<string>('');
 
-    // Debug logging for incoming props
+    // Initialization effect - runs once when component mounts
     useEffect(() => {
-        console.log('ComplexLink value prop:', value);
-        console.log('Current internal state:', { type, link });
-        setDebugInfo(JSON.stringify({ value, internalState: { type, link }}, null, 2));
-    }, [value, type, link]);
+        console.log('Initial value:', value);
+        if (value) {
+            setType(value.type || defaultType);
+            setLink(value.link || '');
+        }
+    }, []); // Empty dependency array for initialization
 
+    // Sync effect - runs when value prop changes
     useEffect(() => {
-        // Sync with external value changes
-        console.log('Value changed externally:', value);
-        if (value?.type !== type) {
-            setType(value?.type || defaultType);
+        console.log('Value changed:', value);
+        if (value) {
+            setType(value.type || defaultType);
+            setLink(value.link || '');
         }
-        if (value?.link !== link) {
-            setLink(value?.link || '');
-        }
-    }, [value?.type, value?.link]);
+    }, [value?.type, value?.link, defaultType]);
+
+    // Debug info update
+    useEffect(() => {
+        setDebugInfo(JSON.stringify({
+            value,
+            internalState: { type, link }
+        }, null, 2));
+    }, [value, type, link]);
 
     const handleTypeChange = (e: ChangeEvent<HTMLSelectElement>) => {
         const newType = e.target.value;
+        console.log('Type changed to:', newType);
         setType(newType);
         setError(null);
         
@@ -50,6 +60,7 @@ const ComplexLink: React.FC<ComplexLinkProps> = ({ value, onChange, defaultType 
 
     const handleLinkChange = (e: ChangeEvent<HTMLInputElement>) => {
         const newLink = e.target.value;
+        console.log('Link changed to:', newLink);
         setLink(newLink);
         setError(null);
 
@@ -84,11 +95,12 @@ const ComplexLink: React.FC<ComplexLinkProps> = ({ value, onChange, defaultType 
                 onChange={handleTypeChange}
                 className="complex-link-select"
             >
-                <option value="model">Model</option>
                 <option value="url">URL</option>
+                <option value="model">Model</option>
             </select>
             
-            {type === 'url' && (
+            {/* Always render URL input when type is url, regardless of internal state */}
+            {(type === 'url' || value?.type === 'url') && (
                 <>
                     <label htmlFor="link">Enter URL:</label>
                     <input 
@@ -97,6 +109,7 @@ const ComplexLink: React.FC<ComplexLinkProps> = ({ value, onChange, defaultType 
                         value={link} 
                         onChange={handleLinkChange}
                         className="complex-link-input"
+                        placeholder="Enter URL..."
                     />
                 </>
             )}
@@ -109,7 +122,6 @@ const ComplexLink: React.FC<ComplexLinkProps> = ({ value, onChange, defaultType 
 
             {/* Debug information */}
             <div style={{ gridColumn: '1 / -1', marginTop: '10px', padding: '8px', background: '#f5f5f5', fontSize: '12px' }}>
-                <h3>Debug Info</h3>
                 <pre>{debugInfo}</pre>
             </div>
         </div>

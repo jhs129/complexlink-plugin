@@ -11,8 +11,9 @@ Builder.registerEditor({
       defaultValue: 'model'
     }
   ],
-  defaultValue: {
-    type: 'model',
-    link: ''
-  }
+  // Only use this if you want a default when the field is first added
+  // defaultValue: {
+  //   type: 'model',
+  //   link: ''
+  // }
 });

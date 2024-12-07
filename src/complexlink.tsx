@@ -11,19 +11,10 @@ interface ComplexLinkProps {
 
 const ComplexLink: React.FC<ComplexLinkProps> = ({ value, onChange, defaultType = 'url' }) => {
     // Initialize state directly from value prop
-    const [type, setType] = useState<string>('url'); // Changed default to 'url'
-    const [link, setLink] = useState<string>(''); // Default initialization
+    const [type, setType] = useState<string>(value?.type || defaultType);
+    const [link, setLink] = useState<string>(value?.link || '');
     const [error, setError] = useState<string | null>(null);
     const [debugInfo, setDebugInfo] = useState<string>('');
-
-    // Initialization effect - runs once when component mounts
-    useEffect(() => {
-        console.log('Initial value:', value);
-        if (value) {
-            setType(value.type || defaultType);
-            setLink(value.link || '');
-        }
-    }, []); // Empty dependency array for initialization
 
     // Sync effect - runs when value prop changes
     useEffect(() => {
@@ -49,7 +40,7 @@ const ComplexLink: React.FC<ComplexLinkProps> = ({ value, onChange, defaultType 
         setError(null);
         
         try {
-            const newValue = { link, type: newType };
+            const newValue = { link: value?.link || '', type: newType };
             console.log('handleTypeChange - sending value:', newValue);
             onChange(newValue);
         } catch (error) {
@@ -99,14 +90,13 @@ const ComplexLink: React.FC<ComplexLinkProps> = ({ value, onChange, defaultType 
                 <option value="model">Model</option>
             </select>
             
-            {/* Always render URL input when type is url, regardless of internal state */}
             {(type === 'url' || value?.type === 'url') && (
                 <>
                     <label htmlFor="link">Enter URL:</label>
                     <input 
                         id="link" 
                         type="text" 
-                        value={link} 
+                        value={link}
                         onChange={handleLinkChange}
                         className="complex-link-input"
                         placeholder="Enter URL..."

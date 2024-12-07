@@ -31,10 +31,15 @@ const ComplexLink: React.FC<ComplexLinkProps> = ({ value, onChange, defaultType 
         }
     });
 
-    const [error, setError] = useState<string | null>(null);
+    const [error, setError] = useState<{message: string; stack?: string} | null>(null);
     const [debugInfo, setDebugInfo] = useState<string>('');
 
- 
+    // Add new state for modal
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    // Add modal toggle handlers
+    const handleOpenModal = () => setIsModalOpen(true);
+    const handleCloseModal = () => setIsModalOpen(false);
 
     // Sync effect - runs when value prop changes
     useEffect(() => {
@@ -65,7 +70,7 @@ const ComplexLink: React.FC<ComplexLinkProps> = ({ value, onChange, defaultType 
             onChange(newValue);
         } catch (error) {
             console.error('Error in handleTypeChange:', error);
-            setError(error instanceof Error ? error.message : 'An error occurred');
+            setError(error instanceof Error ? {message: error.message, stack: error.stack} : {message: 'An error occurred'});
         }
     };
 
@@ -84,7 +89,7 @@ const ComplexLink: React.FC<ComplexLinkProps> = ({ value, onChange, defaultType 
             onChange(newValue);
         } catch (error) {
             console.error('Error in handleLinkChange:', error);
-            setError(error instanceof Error ? error.message : 'An error occurred');
+            setError(error instanceof Error ? {message: error.message, stack: error.stack} : {message: 'An error occurred'});
         }
     };
 
@@ -124,14 +129,49 @@ const ComplexLink: React.FC<ComplexLinkProps> = ({ value, onChange, defaultType 
                 </>
             )}
             
+            {(type === 'model' || value?.type === 'model') && (
+                <>
+                    <label htmlFor="modelSelector">Select Model:</label>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                        <input 
+                            id="modelSelector" 
+                            type="text" 
+                            value={href}
+                            readOnly
+                            className="complex-link-input"
+                            placeholder="No model selected..."
+                        />
+                        <button 
+                            onClick={handleOpenModal}
+                            className="complex-link-button"
+                        >
+                            Select Model
+                        </button>
+                    </div>
+                </>
+            )}
+
+            {/* Add modal placeholder - you'll need to implement your actual modal component */}
+            {isModalOpen && (
+                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)' }}>
+                    {/* Replace this with your actual modal component */}
+                    <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', background: 'white', padding: '20px' }}>
+                        <h2>Select Model</h2>
+                        {/* Add your model selection content here */}
+                        <button onClick={handleCloseModal}>Close</button>
+                    </div>
+                </div>
+            )}
+
             {error && (
-                <div className="complex-link-error" style={{ gridColumn: '1 / -1', color: 'red' }}>
-                    {error}
+                <div className="complex-link-error" style={{ gridColumn: '1 / -1', color: 'red', whiteSpace: 'pre-wrap', fontFamily: 'monospace' }}>
+                    <div>{error.message}</div>
+                    {error.stack && <div style={{ fontSize: '0.9em', marginTop: '8px' }}>{error.stack}</div>}
                 </div>
             )}
 
             {/* Debug information */}
-            <div style={{ display: 'none', gridColumn: '1 / -1', marginTop: '10px', padding: '8px', background: '#f5f5f5', fontSize: '12px' }}>
+            <div style={{ display: 'flex', gridColumn: '1 / -1', marginTop: '10px', padding: '8px', background: '#f5f5f5', fontSize: '12px' }}>
                 <pre>{debugInfo}</pre>
             </div>
         </div>

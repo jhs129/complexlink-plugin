@@ -10,18 +10,37 @@ interface ComplexLinkProps {
 }
 
 const ComplexLink: React.FC<ComplexLinkProps> = ({ value, onChange, defaultType = 'url' }) => {
+
     // Initialize state directly from value prop
-    const [type, setType] = useState<string>(value?.type || defaultType);
-    const [link, setLink] = useState<string>(value?.link || '');
+    const [type, setType] = useState<string>(() => {
+        try {
+            return value.get("type") || defaultType;
+        } catch (error) {
+            console.error('Error initializing type state:', error);
+            return defaultType;
+        }
+    });
+    
+    const [link, setLink] = useState<string>(() => {
+        try {
+            return value.get("link") || '';
+        } catch (error) {
+            console.error('Error initializing link state:', error);
+            return '';
+        }
+    });
+
     const [error, setError] = useState<string | null>(null);
     const [debugInfo, setDebugInfo] = useState<string>('');
+
+ 
 
     // Sync effect - runs when value prop changes
     useEffect(() => {
         console.log('Value changed:', value);
         if (value) {
-            setType(value.type || defaultType);
-            setLink(value.link || '');
+            setType(value.get("type") || defaultType);
+            setLink(value.get("link") || '');
         }
     }, [value?.type, value?.link, defaultType]);
 
@@ -40,7 +59,7 @@ const ComplexLink: React.FC<ComplexLinkProps> = ({ value, onChange, defaultType 
         setError(null);
         
         try {
-            const newValue = { link: value?.link || '', type: newType };
+            const newValue = { link: value.get("link") || '', type: newType };
             console.log('handleTypeChange - sending value:', newValue);
             onChange(newValue);
         } catch (error) {
@@ -111,7 +130,7 @@ const ComplexLink: React.FC<ComplexLinkProps> = ({ value, onChange, defaultType 
             )}
 
             {/* Debug information */}
-            <div style={{ gridColumn: '1 / -1', marginTop: '10px', padding: '8px', background: '#f5f5f5', fontSize: '12px' }}>
+            <div style={{ display: 'flex', gridColumn: '1 / -1', marginTop: '10px', padding: '8px', background: '#f5f5f5', fontSize: '12px' }}>
                 <pre>{debugInfo}</pre>
             </div>
         </div>

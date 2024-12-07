@@ -2,11 +2,11 @@ import React, { useState, ChangeEvent, useEffect } from 'react';
 
 interface ComplexLinkProps {
     value: {
-        get(key: "type" | "link"): string | undefined;
+        get(key: "type" | "href"): string | undefined;
         type: string;
-        link: string;
+        href: string;
     };
-    onChange: (value: { type: string; link: string }) => void;
+    onChange: (value: { type: string; href: string }) => void;
     defaultType?: string;
 }
 
@@ -22,11 +22,11 @@ const ComplexLink: React.FC<ComplexLinkProps> = ({ value, onChange, defaultType 
         }
     });
     
-    const [link, setLink] = useState<string>(() => {
+    const [href, setHref] = useState<string>(() => {
         try {
-            return value.get("link") || '';
+            return value.get("href") || '';
         } catch (error) {
-            console.error('Error initializing link state:', error);
+            console.error('Error initializing href state:', error);
             return '';
         }
     });
@@ -41,17 +41,17 @@ const ComplexLink: React.FC<ComplexLinkProps> = ({ value, onChange, defaultType 
         console.log('Value changed:', value);
         if (value) {
             setType(value.get("type") || defaultType);
-            setLink(value.get("link") || '');
+            setHref(value.get("href") || '');
         }
-    }, [value?.type, value?.link, defaultType]);
+    }, [value?.type, value?.href, defaultType]);
 
     // Debug info update
     useEffect(() => {
         setDebugInfo(JSON.stringify({
             value,
-            internalState: { type, link }
+            internalState: { type, href }
         }, null, 2));
-    }, [value, type, link]);
+    }, [value, type, href]);
 
     const handleTypeChange = (e: ChangeEvent<HTMLSelectElement>) => {
         const newType = e.target.value;
@@ -60,7 +60,7 @@ const ComplexLink: React.FC<ComplexLinkProps> = ({ value, onChange, defaultType 
         setError(null);
         
         try {
-            const newValue = { link: value.get("link") || '', type: newType };
+            const newValue = { href: value.get("href") || '', type: newType };
             console.log('handleTypeChange - sending value:', newValue);
             onChange(newValue);
         } catch (error) {
@@ -70,16 +70,16 @@ const ComplexLink: React.FC<ComplexLinkProps> = ({ value, onChange, defaultType 
     };
 
     const handleLinkChange = (e: ChangeEvent<HTMLInputElement>) => {
-        const newLink = e.target.value;
-        console.log('Link changed to:', newLink);
-        setLink(newLink);
+        const newHref = e.target.value;
+        console.log('Link changed to:', newHref);
+        setHref(newHref);
         setError(null);
 
         try {
-            if (type === 'url' && newLink && !isValidUrl(newLink)) {
+            if (type === 'url' && newHref && !isValidUrl(newHref)) {
                 throw new Error('Invalid URL format');
             }
-            const newValue = { type, link: newLink };
+            const newValue = { type, href: newHref };
             console.log('handleLinkChange - sending value:', newValue);
             onChange(newValue);
         } catch (error) {
@@ -116,7 +116,7 @@ const ComplexLink: React.FC<ComplexLinkProps> = ({ value, onChange, defaultType 
                     <input 
                         id="link" 
                         type="text" 
-                        value={link}
+                        value={href}
                         onChange={handleLinkChange}
                         className="complex-link-input"
                         placeholder="Enter URL..."
@@ -131,7 +131,7 @@ const ComplexLink: React.FC<ComplexLinkProps> = ({ value, onChange, defaultType 
             )}
 
             {/* Debug information */}
-            <div style={{ display: 'flex', gridColumn: '1 / -1', marginTop: '10px', padding: '8px', background: '#f5f5f5', fontSize: '12px' }}>
+            <div style={{ display: 'none', gridColumn: '1 / -1', marginTop: '10px', padding: '8px', background: '#f5f5f5', fontSize: '12px' }}>
                 <pre>{debugInfo}</pre>
             </div>
         </div>

@@ -2,6 +2,7 @@ import React, { useState, ChangeEvent, useEffect } from 'react';
 
 interface ComplexLinkProps {
     value: {
+        get(key: "type" | "link"): string | undefined;
         type: string;
         link: string;
     };

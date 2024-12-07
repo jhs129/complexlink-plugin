@@ -48,7 +48,7 @@ const ComplexLink: React.FC<ComplexLinkProps> = ({ value, onChange, defaultType 
             setType(value.get("type") || defaultType);
             setHref(value.get("href") || '');
         }
-    }, [value?.type, value?.href, defaultType]);
+    }, [value, defaultType]);
 
     // Debug info update
     useEffect(() => {
@@ -131,20 +131,22 @@ const ComplexLink: React.FC<ComplexLinkProps> = ({ value, onChange, defaultType 
     };
 
     return (
-        <div className="complex-link-container" style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '8px', alignItems: 'center' }}>
-            <label htmlFor="type">Link Type:</label>
-            <select 
-                id="type" 
-                value={type} 
-                onChange={handleTypeChange}
-                className="complex-link-select"
-            >
-                <option value="url">URL</option>
-                <option value="model">Model</option>
-            </select>
+        <div className="complex-link-container" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div id="type-container" style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '8px', alignItems: 'center' }}>
+                <label htmlFor="type">Link Type:</label>
+                <select 
+                    id="type" 
+                    value={type} 
+                    onChange={handleTypeChange}
+                    className="complex-link-select"
+                >
+                    <option value="url">URL</option>
+                    <option value="model">Model</option>
+                </select>
+            </div>
             
             {(type === 'url' || value?.type === 'url') && (
-                <>
+                <div id="link-container" style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '8px', alignItems: 'center' }}>
                     <label htmlFor="link">Enter URL:</label>
                     <input 
                         id="link" 
@@ -153,12 +155,13 @@ const ComplexLink: React.FC<ComplexLinkProps> = ({ value, onChange, defaultType 
                         onChange={handleLinkChange}
                         className="complex-link-input"
                         placeholder="Enter URL..."
+                        readOnly={type === 'model'}
                     />
-                </>
+                </div>
             )}
             
             {(type === 'model' || value?.type === 'model') && (
-                <>
+                <div id="model-container" style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '8px', alignItems: 'center' }}>
                     <label htmlFor="modelSelector">Select Model:</label>
                     <div style={{ display: 'flex', gap: '8px' }}>
                         <input 
@@ -176,12 +179,12 @@ const ComplexLink: React.FC<ComplexLinkProps> = ({ value, onChange, defaultType 
                             Select Model
                         </button>
                     </div>
-                </>
+                </div>
             )}
-
+            
             {/* Add modal placeholder - you'll need to implement your actual modal component */}
             {isModalOpen && (
-                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)' }}>
+                <div id="modal-container" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)' }}>
                     {/* Replace this with your actual modal component */}
                     <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', background: 'white', padding: '20px' }}>
                         <h2>Select Model</h2>
@@ -192,14 +195,14 @@ const ComplexLink: React.FC<ComplexLinkProps> = ({ value, onChange, defaultType 
             )}
 
             {error && (
-                <div className="complex-link-error" style={{ gridColumn: '1 / -1', color: 'red', whiteSpace: 'pre-wrap', fontFamily: 'monospace' }}>
+                <div id="error-container" className="complex-link-error" style={{ gridColumn: '1 / -1', color: 'red', whiteSpace: 'pre-wrap', fontFamily: 'monospace' }}>
                     <div>{error.message}</div>
                     {error.stack && <div style={{ fontSize: '0.9em', marginTop: '8px' }}>{error.stack}</div>}
                 </div>
             )}
 
             {/* Debug information */}
-            <div style={{ display: 'flex', gridColumn: '1 / -1', marginTop: '10px', padding: '8px', background: '#f5f5f5', fontSize: '12px' }}>
+            <div id="debug-container" style={{ display: 'flex', gridColumn: '1 / -1', marginTop: '10px', padding: '8px', background: '#f5f5f5', fontSize: '12px' }}>
                 <pre>{debugInfo}</pre>
             </div>
         </div>

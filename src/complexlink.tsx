@@ -65,12 +65,31 @@ const ComplexLink: React.FC<ComplexLinkProps> = ({ value, onChange, defaultType 
         setError(null);
         
         try {
-            const newValue = { href: value.get("href") || '', type: newType };
+            // Add defensive check for value
+            if (!value) {
+                console.warn('Value prop is undefined in handleTypeChange');
+                const newValue = { href: '', type: newType };
+                onChange(newValue);
+                return;
+            }
+
+            // Use optional chaining and provide default value
+            const currentHref = value?.get?.("href") || '';
+            const newValue = { href: currentHref, type: newType };
             console.log('handleTypeChange - sending value:', newValue);
             onChange(newValue);
         } catch (error) {
-            console.error('Error in handleTypeChange:', error);
-            setError(error instanceof Error ? {message: error.message, stack: error.stack} : {message: 'An error occurred'});
+            const contextualError = new Error(
+                `Error while changing link type to '${newType}' (current value: ${JSON.stringify(value)}): ${error instanceof Error ? error.message : 'An error occurred'}`
+            );
+            console.error('Error in handleTypeChange:', contextualError);
+            setError(error instanceof Error ? 
+                {
+                    message: contextualError.message,
+                    stack: `${contextualError.stack}\n\nCaused by: ${error.stack}`
+                } : 
+                {message: contextualError.message}
+            );
         }
     };
 
@@ -82,14 +101,23 @@ const ComplexLink: React.FC<ComplexLinkProps> = ({ value, onChange, defaultType 
 
         try {
             if (type === 'url' && newHref && !isValidUrl(newHref)) {
-                throw new Error('Invalid URL format');
+                throw new Error(`Invalid URL format: "${newHref}"`);
             }
             const newValue = { type, href: newHref };
             console.log('handleLinkChange - sending value:', newValue);
             onChange(newValue);
         } catch (error) {
-            console.error('Error in handleLinkChange:', error);
-            setError(error instanceof Error ? {message: error.message, stack: error.stack} : {message: 'An error occurred'});
+            const contextualError = new Error(
+                `Error while updating link value to '${newHref}': ${error instanceof Error ? error.message : 'An error occurred'}`
+            );
+            console.error('Error in handleLinkChange:', contextualError);
+            setError(error instanceof Error ? 
+                {
+                    message: contextualError.message,
+                    stack: `${contextualError.stack}\n\nCaused by: ${error.stack}`
+                } : 
+                {message: contextualError.message}
+            );
         }
     };
 

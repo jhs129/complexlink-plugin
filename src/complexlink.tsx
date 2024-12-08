@@ -3,11 +3,12 @@ import { styles } from './complexlink.styles';
 
 interface ComplexLinkProps {
     value: {
-        get(key: "type" | "href"): string | undefined;
+        get(key: "type" | "href" | "model"): string | undefined;
         type: string;
         href: string;
+        model?: string;
     };
-    onChange: (value: { type: string; href: string }) => void;
+    onChange: (value: { type: string; href: string; model?: string }) => void;
     defaultType?: string;
 }
 
@@ -42,12 +43,23 @@ const ComplexLink: React.FC<ComplexLinkProps> = ({ value, onChange, defaultType 
     const handleOpenModal = () => setIsModalOpen(true);
     const handleCloseModal = () => setIsModalOpen(false);
 
+    // Add model state
+    const [model, setModel] = useState<string>(() => {
+        try {
+            return value.get("model") || '';
+        } catch (error) {
+            console.error('Error initializing model state:', error);
+            return '';
+        }
+    });
+
     // Sync effect - runs when value prop changes
     useEffect(() => {
         console.log('Value changed:', value);
         if (value) {
             setType(value.get("type") || defaultType);
             setHref(value.get("href") || '');
+            setModel(value.get("model") || '');
         }
     }, [value, defaultType]);
 
@@ -121,6 +133,28 @@ const ComplexLink: React.FC<ComplexLinkProps> = ({ value, onChange, defaultType 
         }
     };
 
+    // Update model selection handler
+    const handleModelSelect = (e: ChangeEvent<HTMLSelectElement>) => {
+        const selectedModel = e.target.value;
+        setModel(selectedModel);
+        
+        try {
+            const newValue = { 
+                type, 
+                href: href || '', 
+                model: selectedModel 
+            };
+            onChange(newValue);
+            handleCloseModal();
+        } catch (error) {
+            console.error('Error in handleModelSelect:', error);
+            setError(error instanceof Error ? 
+                { message: error.message, stack: error.stack } : 
+                { message: 'An error occurred' }
+            );
+        }
+    };
+
     return (
         <div className="complex-link-container" style={styles.container}>
             <div style={styles.formRow}>
@@ -185,15 +219,13 @@ const ComplexLink: React.FC<ComplexLinkProps> = ({ value, onChange, defaultType 
                         <h2>Select Model</h2>
                         <select
                             style={styles.modelSelect}
-                            onChange={(e) => console.log(e.target.value)}
+                            value={model}
+                            onChange={handleModelSelect}
                         >
                             <option value="">Select a model type...</option>
                             <option value="page">Page</option>
                             <option value="blog">Blog</option>
                         </select>
-                        <div style={styles.modalActions}>
-                            <button onClick={handleCloseModal}>Select</button>
-                        </div>
                     </div>
                 </div>
             )}

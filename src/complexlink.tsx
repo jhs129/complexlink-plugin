@@ -3,14 +3,42 @@ import { styles } from './complexlink.styles';
 
 interface ComplexLinkProps {
     value: {
-        get(key: "type" | "href" | "model"): string | undefined;
+        get(key: "type" | "href" | "model" | "referenceId"): string | undefined;
         type: string;
         href: string;
         model?: string;
+        referenceId?: string;
     };
-    onChange: (value: { type: string; href: string; model?: string }) => void;
+    onChange: (value: { 
+        type: string; 
+        href: string; 
+        model?: string;
+        referenceId?: string;
+    }) => void;
     defaultType?: string;
 }
+
+interface ModelInstance {
+    id: string;
+    href: string;
+    name: string;
+    type: string;
+}
+
+const SAMPLE_INSTANCES: ModelInstance[] = [
+    // Page instances
+    { id: 'page_1', href: '/pages/home', name: 'Home Page', type: 'page' },
+    { id: 'page_2', href: '/pages/about', name: 'About Us', type: 'page' },
+    { id: 'page_3', href: '/pages/contact', name: 'Contact Page', type: 'page' },
+    { id: 'page_4', href: '/pages/services', name: 'Services', type: 'page' },
+    { id: 'page_5', href: '/pages/privacy', name: 'Privacy Policy', type: 'page' },
+    // Blog instances
+    { id: 'blog_1', href: '/blog/getting-started', name: 'Getting Started Guide', type: 'blog' },
+    { id: 'blog_2', href: '/blog/top-10-tips', name: '10 Tips for Success', type: 'blog' },
+    { id: 'blog_3', href: '/blog/product-updates-2024', name: 'Product Updates 2024', type: 'blog' },
+    { id: 'blog_4', href: '/blog/industry-insights', name: 'Industry Insights', type: 'blog' },
+    { id: 'blog_5', href: '/blog/customer-stories', name: 'Customer Stories', type: 'blog' },
+];
 
 const ComplexLink: React.FC<ComplexLinkProps> = ({ value, onChange, defaultType = 'url' }) => {
 
@@ -53,6 +81,16 @@ const ComplexLink: React.FC<ComplexLinkProps> = ({ value, onChange, defaultType 
         }
     });
 
+    // Add referenceId state
+    const [referenceId, setReferenceId] = useState<string>(() => {
+        try {
+            return value.get("referenceId") || '';
+        } catch (error) {
+            console.error('Error initializing referenceId state:', error);
+            return '';
+        }
+    });
+
     // Sync effect - runs when value prop changes
     useEffect(() => {
         console.log('Value changed:', value);
@@ -60,6 +98,7 @@ const ComplexLink: React.FC<ComplexLinkProps> = ({ value, onChange, defaultType 
             setType(value.get("type") || defaultType);
             setHref(value.get("href") || '');
             setModel(value.get("model") || '');
+            setReferenceId(value.get("referenceId") || '');
         }
     }, [value, defaultType]);
 
@@ -125,12 +164,13 @@ const ComplexLink: React.FC<ComplexLinkProps> = ({ value, onChange, defaultType 
     };
 
     const isValidUrl = (urlString: string): boolean => {
-        try {
-            new URL(urlString);
-            return true;
-        } catch {
-            return false;
-        }
+        // try {
+        //     //new URL(urlString);
+        //     return true;
+        // } catch {
+        //     return false;
+        // }
+        return true;
     };
 
     // Update model selection handler
@@ -152,6 +192,43 @@ const ComplexLink: React.FC<ComplexLinkProps> = ({ value, onChange, defaultType 
                 { message: error.message, stack: error.stack } : 
                 { message: 'An error occurred' }
             );
+        }
+    };
+
+    const [selectedModelType, setSelectedModelType] = useState<string>('');
+    
+    // Filter instances based on selected model type
+    const filteredInstances = SAMPLE_INSTANCES.filter(
+        instance => instance.type === selectedModelType
+    );
+
+    // Update model type selection handler
+    const handleModelTypeSelect = (e: ChangeEvent<HTMLSelectElement>) => {
+        setSelectedModelType(e.target.value);
+    };
+
+    // Update instance selection handler
+    const handleInstanceSelect = (e: ChangeEvent<HTMLSelectElement>) => {
+        const selectedId = e.target.value;
+        const selectedInstance = SAMPLE_INSTANCES.find(instance => instance.id === selectedId);
+        
+        if (selectedInstance) {
+            try {
+                const newValue = { 
+                    type, 
+                    href: selectedInstance.href,
+                    model: selectedInstance.type,
+                    referenceId: selectedInstance.id
+                };
+                onChange(newValue);
+                handleCloseModal();
+            } catch (error) {
+                console.error('Error in handleInstanceSelect:', error);
+                setError(error instanceof Error ? 
+                    { message: error.message, stack: error.stack } : 
+                    { message: 'An error occurred' }
+                );
+            }
         }
     };
 
@@ -217,15 +294,38 @@ const ComplexLink: React.FC<ComplexLinkProps> = ({ value, onChange, defaultType 
                             x
                         </button>
                         <h2>Select Model</h2>
-                        <select
-                            style={styles.modelSelect}
-                            value={model}
-                            onChange={handleModelSelect}
-                        >
-                            <option value="">Select a model type...</option>
-                            <option value="page">Page</option>
-                            <option value="blog">Blog</option>
-                        </select>
+                        <div style={styles.modalForm}>
+                            <div style={styles.modalField}>
+                                <label>Model Type:</label>
+                                <select
+                                    style={styles.modelSelect}
+                                    value={selectedModelType}
+                                    onChange={handleModelTypeSelect}
+                                >
+                                    <option value="">Select a model type...</option>
+                                    <option value="page">Page</option>
+                                    <option value="blog">Blog</option>
+                                </select>
+                            </div>
+                            
+                            {selectedModelType && (
+                                <div style={styles.modalField}>
+                                    <label>Select Instance:</label>
+                                    <select
+                                        style={styles.modelSelect}
+                                        onChange={handleInstanceSelect}
+                                        value={referenceId || ''}
+                                    >
+                                        <option value="">Select an instance...</option>
+                                        {filteredInstances.map(instance => (
+                                            <option key={instance.id} value={instance.id}>
+                                                {instance.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
             )}

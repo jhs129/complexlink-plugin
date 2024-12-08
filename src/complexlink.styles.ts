@@ -69,5 +69,15 @@ export const styles: Record<string, CSSProperties> = {
         padding: '8px',
         background: '#f5f5f5',
         fontSize: '12px'
+    },
+    modalForm: {
+        display: 'flex',
+        flexDirection: 'column' as const,
+        gap: '16px'
+    },
+    modalField: {
+        display: 'flex',
+        flexDirection: 'column' as const,
+        gap: '8px'
     }
 }; 

@@ -1,4 +1,5 @@
 import React, { useState, ChangeEvent, useEffect } from 'react';
+import { styles } from './complexlink.styles';
 
 interface ComplexLinkProps {
     value: {
@@ -65,28 +66,18 @@ const ComplexLink: React.FC<ComplexLinkProps> = ({ value, onChange, defaultType 
         setError(null);
         
         try {
-            // Add defensive check for value
-            if (!value) {
-                console.warn('Value prop is undefined in handleTypeChange');
-                const newValue = { href: '', type: newType };
-                onChange(newValue);
-                return;
-            }
-
-            // Use optional chaining and provide default value
-            const currentHref = value?.get?.("href") || '';
-            const newValue = { href: currentHref, type: newType };
+            const newValue = { href: href || '', type: newType };
             console.log('handleTypeChange - sending value:', newValue);
             onChange(newValue);
         } catch (error) {
             const contextualError = new Error(
-                `Error while changing link type to '${newType}' (current value: ${JSON.stringify(value)}): ${error instanceof Error ? error.message : 'An error occurred'}`
+                `Error while changing link type to '${newType}': ${error instanceof Error ? error.message : 'An error occurred'}`
             );
             console.error('Error in handleTypeChange:', contextualError);
             setError(error instanceof Error ? 
                 {
                     message: contextualError.message,
-                    stack: `${contextualError.stack}\n\nCaused by: ${error.stack}`
+                    stack: `${contextualError.stack}\n\nCaused by: ${error instanceof Error ? error.stack : ''}`
                 } : 
                 {message: contextualError.message}
             );
@@ -114,7 +105,7 @@ const ComplexLink: React.FC<ComplexLinkProps> = ({ value, onChange, defaultType 
             setError(error instanceof Error ? 
                 {
                     message: contextualError.message,
-                    stack: `${contextualError.stack}\n\nCaused by: ${error.stack}`
+                    stack: `${contextualError.stack}\n\nCaused by: ${error instanceof Error ? error.stack : ''}`
                 } : 
                 {message: contextualError.message}
             );
@@ -131,8 +122,8 @@ const ComplexLink: React.FC<ComplexLinkProps> = ({ value, onChange, defaultType 
     };
 
     return (
-        <div className="complex-link-container" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <div id="type-container" style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '8px', alignItems: 'center' }}>
+        <div className="complex-link-container" style={styles.container}>
+            <div style={styles.formRow}>
                 <label htmlFor="type">Link Type:</label>
                 <select 
                     id="type" 
@@ -146,7 +137,7 @@ const ComplexLink: React.FC<ComplexLinkProps> = ({ value, onChange, defaultType 
             </div>
             
             {(type === 'url' || value?.type === 'url') && (
-                <div id="link-container" style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '8px', alignItems: 'center' }}>
+                <div style={styles.formRow}>
                     <label htmlFor="link">Enter URL:</label>
                     <input 
                         id="link" 
@@ -161,10 +152,9 @@ const ComplexLink: React.FC<ComplexLinkProps> = ({ value, onChange, defaultType 
             )}
             
             {(type === 'model' || value?.type === 'model') && (
-                <>
-                <div id="model-container" style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '8px', alignItems: 'center' }}>
+                <div style={styles.formRow}>
                     <label htmlFor="modelSelector">Select Model:</label>
-                    <div style={{ display: 'flex', gap: '8px' }}>
+                    <div style={styles.modelInputGroup}>
                         <input 
                             id="modelSelector" 
                             type="text" 
@@ -181,49 +171,27 @@ const ComplexLink: React.FC<ComplexLinkProps> = ({ value, onChange, defaultType 
                         </button>
                     </div>
                 </div>
-                <div id="link-label-container" style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '8px', alignItems: 'center' }}>
-                    <div>Link Value:</div><div>{href}</div>
-                </div>
-                </>
-
             )}
             
-            {/* Add modal placeholder - you'll need to implement your actual modal component */}
             {isModalOpen && (
-                <div id="modal-container" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)' }}>
-                    <div style={{ 
-                        position: 'absolute', 
-                        top: '50%', 
-                        left: '50%', 
-                        transform: 'translate(-50%, -50%)', 
-                        background: 'white', 
-                        padding: '20px'
-                    }}>
+                <div style={styles.modalOverlay}>
+                    <div style={styles.modalContent}>
                         <button 
                             onClick={handleCloseModal}
-                            style={{
-                                position: 'absolute',
-                                right: '10px',
-                                top: '10px',
-                                background: 'none',
-                                border: 'none',
-                                fontSize: '20px',
-                                cursor: 'pointer',
-                                padding: '5px'
-                            }}
+                            style={styles.closeButton}
                         >
                             x
                         </button>
                         <h2>Select Model</h2>
                         <select
-                            style={{ width: '100%', padding: '8px', marginBottom: '16px' }}
+                            style={styles.modelSelect}
                             onChange={(e) => console.log(e.target.value)}
                         >
                             <option value="">Select a model type...</option>
                             <option value="page">Page</option>
                             <option value="blog">Blog</option>
                         </select>
-                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+                        <div style={styles.modalActions}>
                             <button onClick={handleCloseModal}>Select</button>
                         </div>
                     </div>
@@ -231,14 +199,13 @@ const ComplexLink: React.FC<ComplexLinkProps> = ({ value, onChange, defaultType 
             )}
 
             {error && (
-                <div id="error-container" className="complex-link-error" style={{ gridColumn: '1 / -1', color: 'red', whiteSpace: 'pre-wrap', fontFamily: 'monospace' }}>
+                <div style={styles.errorContainer}>
                     <div>{error.message}</div>
                     {error.stack && <div style={{ fontSize: '0.9em', marginTop: '8px' }}>{error.stack}</div>}
                 </div>
             )}
 
-            {/* Debug information */}
-            <div id="debug-container" style={{ display: 'flex', gridColumn: '1 / -1', marginTop: '10px', padding: '8px', background: '#f5f5f5', fontSize: '12px' }}>
+            <div style={styles.debugContainer}>
                 <pre>{debugInfo}</pre>
             </div>
         </div>

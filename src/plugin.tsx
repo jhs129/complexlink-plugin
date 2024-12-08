@@ -1,5 +1,5 @@
 import { Builder } from "@builder.io/react";
-import ComplexLink from "./components/ComplexlLink";
+import ComplexLink from "./components/ComplexLink";
 
 Builder.registerEditor({
   name: "ComplexLink",

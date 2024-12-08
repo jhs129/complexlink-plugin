@@ -1,21 +1,9 @@
 import React, { useState, ChangeEvent, useEffect } from 'react';
 import { styles } from './ComplexLink.styles';
 import { ComplexLinkProps, ModelInstance } from '../types';
+import { ModelSelector } from './ModelSelector';
 
-const SAMPLE_INSTANCES: ModelInstance[] = [
-    // Page instances
-    { id: 'page_1', href: '/pages/home', name: 'Home Page', type: 'page' },
-    { id: 'page_2', href: '/pages/about', name: 'About Us', type: 'page' },
-    { id: 'page_3', href: '/pages/contact', name: 'Contact Page', type: 'page' },
-    { id: 'page_4', href: '/pages/services', name: 'Services', type: 'page' },
-    { id: 'page_5', href: '/pages/privacy', name: 'Privacy Policy', type: 'page' },
-    // Blog instances
-    { id: 'blog_1', href: '/blog/getting-started', name: 'Getting Started Guide', type: 'blog' },
-    { id: 'blog_2', href: '/blog/top-10-tips', name: '10 Tips for Success', type: 'blog' },
-    { id: 'blog_3', href: '/blog/product-updates-2024', name: 'Product Updates 2024', type: 'blog' },
-    { id: 'blog_4', href: '/blog/industry-insights', name: 'Industry Insights', type: 'blog' },
-    { id: 'blog_5', href: '/blog/customer-stories', name: 'Customer Stories', type: 'blog' },
-];
+
 
 const ComplexLink: React.FC<ComplexLinkProps> = ({ value, onChange, defaultType = 'url' }) => {
 
@@ -40,13 +28,6 @@ const ComplexLink: React.FC<ComplexLinkProps> = ({ value, onChange, defaultType 
 
     const [error, setError] = useState<{message: string; stack?: string} | null>(null);
     const [debugInfo, setDebugInfo] = useState<string>('');
-
-    // Add new state for modal
-    const [isModalOpen, setIsModalOpen] = useState(false);
-
-    // Add modal toggle handlers
-    const handleOpenModal = () => setIsModalOpen(true);
-    const handleCloseModal = () => setIsModalOpen(false);
 
     // Add model state
     const [model, setModel] = useState<string>(() => {
@@ -141,12 +122,7 @@ const ComplexLink: React.FC<ComplexLinkProps> = ({ value, onChange, defaultType 
     };
 
     const isValidUrl = (urlString: string): boolean => {
-        // try {
-        //     //new URL(urlString);
-        //     return true;
-        // } catch {
-        //     return false;
-        // }
+
         return true;
     };
 
@@ -162,7 +138,6 @@ const ComplexLink: React.FC<ComplexLinkProps> = ({ value, onChange, defaultType 
                 model: selectedModel 
             };
             onChange(newValue);
-            handleCloseModal();
         } catch (error) {
             console.error('Error in handleModelSelect:', error);
             setError(error instanceof Error ? 
@@ -172,40 +147,21 @@ const ComplexLink: React.FC<ComplexLinkProps> = ({ value, onChange, defaultType 
         }
     };
 
-    const [selectedModelType, setSelectedModelType] = useState<string>('');
-    
-    // Filter instances based on selected model type
-    const filteredInstances = SAMPLE_INSTANCES.filter(
-        instance => instance.type === selectedModelType
-    );
-
-    // Update model type selection handler
-    const handleModelTypeSelect = (e: ChangeEvent<HTMLSelectElement>) => {
-        setSelectedModelType(e.target.value);
-    };
-
-    // Update instance selection handler
-    const handleInstanceSelect = (e: ChangeEvent<HTMLSelectElement>) => {
-        const selectedId = e.target.value;
-        const selectedInstance = SAMPLE_INSTANCES.find(instance => instance.id === selectedId);
-        
-        if (selectedInstance) {
-            try {
-                const newValue = { 
-                    type, 
-                    href: selectedInstance.href,
-                    model: selectedInstance.type,
-                    referenceId: selectedInstance.id
-                };
-                onChange(newValue);
-                handleCloseModal();
-            } catch (error) {
-                console.error('Error in handleInstanceSelect:', error);
-                setError(error instanceof Error ? 
-                    { message: error.message, stack: error.stack } : 
-                    { message: 'An error occurred' }
-                );
-            }
+    const handleModelInstanceSelect = (instance: ModelInstance) => {
+        try {
+            const newValue = { 
+                type, 
+                href: instance.href,
+                model: instance.type,
+                referenceId: instance.id
+            };
+            onChange(newValue);
+        } catch (error) {
+            console.error('Error in handleModelInstanceSelect:', error);
+            setError(error instanceof Error ? 
+                { message: error.message, stack: error.stack } : 
+                { message: 'An error occurred' }
+            );
         }
     };
 
@@ -240,71 +196,11 @@ const ComplexLink: React.FC<ComplexLinkProps> = ({ value, onChange, defaultType 
             )}
             
             {(type === 'model' || value?.type === 'model') && (
-                <div style={styles.formRow}>
-                    <label htmlFor="modelSelector">Select Model:</label>
-                    <div style={styles.modelInputGroup}>
-                        <input 
-                            id="modelSelector" 
-                            type="text" 
-                            value={href}
-                            readOnly
-                            className="complex-link-input"
-                            placeholder="No model selected..."
-                        />
-                        <button 
-                            onClick={handleOpenModal}
-                            className="complex-link-button"
-                        >
-                            Select Model
-                        </button>
-                    </div>
-                </div>
-            )}
-            
-            {isModalOpen && (
-                <div style={styles.modalOverlay}>
-                    <div style={styles.modalContent}>
-                        <button 
-                            onClick={handleCloseModal}
-                            style={styles.closeButton}
-                        >
-                            x
-                        </button>
-                        <h2>Select Model</h2>
-                        <div style={styles.modalForm}>
-                            <div style={styles.modalField}>
-                                <label>Model Type:</label>
-                                <select
-                                    style={styles.modelSelect}
-                                    value={selectedModelType}
-                                    onChange={handleModelTypeSelect}
-                                >
-                                    <option value="">Select a model type...</option>
-                                    <option value="page">Page</option>
-                                    <option value="blog">Blog</option>
-                                </select>
-                            </div>
-                            
-                            {selectedModelType && (
-                                <div style={styles.modalField}>
-                                    <label>Select Instance:</label>
-                                    <select
-                                        style={styles.modelSelect}
-                                        onChange={handleInstanceSelect}
-                                        value={referenceId || ''}
-                                    >
-                                        <option value="">Select an instance...</option>
-                                        {filteredInstances.map(instance => (
-                                            <option key={instance.id} value={instance.id}>
-                                                {instance.name}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </div>
+                <ModelSelector
+                    href={href}
+                    referenceId={referenceId}
+                    onModelSelect={handleModelInstanceSelect}
+                />
             )}
 
             {error && (

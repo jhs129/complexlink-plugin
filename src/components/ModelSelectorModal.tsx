@@ -1,5 +1,5 @@
 import React, { ChangeEvent } from 'react';
-import { styles } from '../complexlink.styles';
+import { styles } from './ComplexLink.styles';
 import { ModelInstance } from '../types';
 
 interface ModelSelectorModalProps {

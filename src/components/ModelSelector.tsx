@@ -1,31 +1,24 @@
 import React, { useState, ChangeEvent } from 'react';
 import { styles } from './ComplexLink.styles';
-import { ModelInstance, ModelSelectorProps } from '../types';
+import { ModelInstance } from '../types';
 
-const SAMPLE_INSTANCES: ModelInstance[] = [
-    // Page instances
-    { id: 'page_1', href: '/pages/home', name: 'Home Page', type: 'page' },
-    { id: 'page_2', href: '/pages/about', name: 'About Us', type: 'page' },
-    { id: 'page_3', href: '/pages/contact', name: 'Contact Page', type: 'page' },
-    { id: 'page_4', href: '/pages/services', name: 'Services', type: 'page' },
-    { id: 'page_5', href: '/pages/privacy', name: 'Privacy Policy', type: 'page' },
-    // Blog instances
-    { id: 'blog_1', href: '/blog/getting-started', name: 'Getting Started Guide', type: 'blog' },
-    { id: 'blog_2', href: '/blog/top-10-tips', name: '10 Tips for Success', type: 'blog' },
-    { id: 'blog_3', href: '/blog/product-updates-2024', name: 'Product Updates 2024', type: 'blog' },
-    { id: 'blog_4', href: '/blog/industry-insights', name: 'Industry Insights', type: 'blog' },
-    { id: 'blog_5', href: '/blog/customer-stories', name: 'Customer Stories', type: 'blog' },
-];
+interface ModelSelectorProps {
+  href: string;
+  referenceId: string;
+  instances: ModelInstance[];
+  onModelSelect: (instance: ModelInstance) => void;
+}
 
 export const ModelSelector: React.FC<ModelSelectorProps> = ({
   href,
   referenceId,
+  instances,
   onModelSelect
 }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedModelType, setSelectedModelType] = useState<string>('');
     
-    const filteredInstances = SAMPLE_INSTANCES.filter(
+    const filteredInstances = instances.filter(
         instance => instance.type === selectedModelType
     );
 
@@ -35,7 +28,7 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
 
     const handleInstanceSelect = (e: ChangeEvent<HTMLSelectElement>) => {
         const selectedId = e.target.value;
-        const selectedInstance = SAMPLE_INSTANCES.find(instance => instance.id === selectedId);
+        const selectedInstance = instances.find(instance => instance.id === selectedId);
         
         if (selectedInstance) {
             onModelSelect(selectedInstance);

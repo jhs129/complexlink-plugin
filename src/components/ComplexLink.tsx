@@ -3,7 +3,20 @@ import { styles } from './ComplexLink.styles';
 import { ComplexLinkProps, ModelInstance } from '../types';
 import { ModelSelector } from './ModelSelector';
 
-
+// Move this to a separate constants file if needed
+const DEFAULT_MODEL_CONTENT_INSTANCES: ModelInstance[] = [
+    // Page instances
+    { id: 'page_1', href: '/pages/home', name: 'Home Page', type: 'page' },
+    { id: 'page_2', href: '/pages/about', name: 'About Us', type: 'page' },
+    { id: 'page_3', href: '/pages/services', name: 'Our Services', type: 'page' },
+    { id: 'page_4', href: '/pages/contact', name: 'Contact Us', type: 'page' },
+    
+    // Blog instances
+    { id: 'blog_1', href: '/blog/getting-started', name: 'Getting Started Guide', type: 'blog' },
+    { id: 'blog_2', href: '/blog/best-practices', name: 'Development Best Practices', type: 'blog' },
+    { id: 'blog_3', href: '/blog/case-studies', name: 'Customer Success Stories', type: 'blog' },
+    { id: 'blog_4', href: '/blog/tech-trends', name: 'Latest Tech Trends', type: 'blog' }
+];
 
 const ComplexLink: React.FC<ComplexLinkProps> = ({ value, onChange, defaultType = 'url' }) => {
 
@@ -155,6 +168,8 @@ const ComplexLink: React.FC<ComplexLinkProps> = ({ value, onChange, defaultType 
                 model: instance.type,
                 referenceId: instance.id
             };
+            setHref(instance.href);
+            setReferenceId(instance.id);
             onChange(newValue);
         } catch (error) {
             console.error('Error in handleModelInstanceSelect:', error);
@@ -199,6 +214,7 @@ const ComplexLink: React.FC<ComplexLinkProps> = ({ value, onChange, defaultType 
                 <ModelSelector
                     href={href}
                     referenceId={referenceId}
+                    instances={DEFAULT_MODEL_CONTENT_INSTANCES}
                     onModelSelect={handleModelInstanceSelect}
                 />
             )}

@@ -1,29 +1,6 @@
 import React, { useState, ChangeEvent, useEffect } from 'react';
 import { styles } from './complexlink.styles';
-
-interface ComplexLinkProps {
-    value: {
-        get(key: "type" | "href" | "model" | "referenceId"): string | undefined;
-        type: string;
-        href: string;
-        model?: string;
-        referenceId?: string;
-    };
-    onChange: (value: { 
-        type: string; 
-        href: string; 
-        model?: string;
-        referenceId?: string;
-    }) => void;
-    defaultType?: string;
-}
-
-interface ModelInstance {
-    id: string;
-    href: string;
-    name: string;
-    type: string;
-}
+import { ComplexLinkProps, ModelInstance } from './types';
 
 const SAMPLE_INSTANCES: ModelInstance[] = [
     // Page instances

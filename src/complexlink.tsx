@@ -161,6 +161,7 @@ const ComplexLink: React.FC<ComplexLinkProps> = ({ value, onChange, defaultType 
             )}
             
             {(type === 'model' || value?.type === 'model') && (
+                <>
                 <div id="model-container" style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '8px', alignItems: 'center' }}>
                     <label htmlFor="modelSelector">Select Model:</label>
                     <div style={{ display: 'flex', gap: '8px' }}>
@@ -180,16 +181,51 @@ const ComplexLink: React.FC<ComplexLinkProps> = ({ value, onChange, defaultType 
                         </button>
                     </div>
                 </div>
+                <div id="link-label-container" style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '8px', alignItems: 'center' }}>
+                    <div>Link Value:</div><div>{href}</div>
+                </div>
+                </>
+
             )}
             
             {/* Add modal placeholder - you'll need to implement your actual modal component */}
             {isModalOpen && (
                 <div id="modal-container" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)' }}>
-                    {/* Replace this with your actual modal component */}
-                    <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', background: 'white', padding: '20px' }}>
+                    <div style={{ 
+                        position: 'absolute', 
+                        top: '50%', 
+                        left: '50%', 
+                        transform: 'translate(-50%, -50%)', 
+                        background: 'white', 
+                        padding: '20px'
+                    }}>
+                        <button 
+                            onClick={handleCloseModal}
+                            style={{
+                                position: 'absolute',
+                                right: '10px',
+                                top: '10px',
+                                background: 'none',
+                                border: 'none',
+                                fontSize: '20px',
+                                cursor: 'pointer',
+                                padding: '5px'
+                            }}
+                        >
+                            x
+                        </button>
                         <h2>Select Model</h2>
-                        {/* Add your model selection content here */}
-                        <button onClick={handleCloseModal}>Close</button>
+                        <select
+                            style={{ width: '100%', padding: '8px', marginBottom: '16px' }}
+                            onChange={(e) => console.log(e.target.value)}
+                        >
+                            <option value="">Select a model type...</option>
+                            <option value="page">Page</option>
+                            <option value="blog">Blog</option>
+                        </select>
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+                            <button onClick={handleCloseModal}>Select</button>
+                        </div>
                     </div>
                 </div>
             )}

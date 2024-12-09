@@ -2,9 +2,10 @@ import React, { useState, ChangeEvent, useEffect } from 'react';
 import { styles } from './ComplexLink.styles';
 import { ComplexLinkProps, ModelInstance } from '../types';
 import { ModelSelector } from './ModelSelector';
+import { builder } from '@builder.io/react';
 
 // Move this to a separate constants file if needed
-const DEFAULT_MODEL_CONTENT_INSTANCES: ModelInstance[] = [
+const DEFAULT_MODEL_CONTENT_INSTANCES_OLD: ModelInstance[] = [
     // Page instances
     { id: 'page_1', href: '/pages/home', name: 'Home Page', type: 'page' },
     { id: 'page_2', href: '/pages/about', name: 'About Us', type: 'page' },
@@ -17,6 +18,30 @@ const DEFAULT_MODEL_CONTENT_INSTANCES: ModelInstance[] = [
     { id: 'blog_3', href: '/blog/case-studies', name: 'Customer Success Stories', type: 'blog' },
     { id: 'blog_4', href: '/blog/tech-trends', name: 'Latest Tech Trends', type: 'blog' }
 ];
+
+builder.init("9d9c17771b684627bed7d61d5f05ef44");
+
+
+const fetchInstancesByModel = async (type: string): Promise<ModelInstance[]> => {
+    // let items = DEFAULT_MODEL_CONTENT_INSTANCES.filter(instance => instance.type === type);
+    const content = await builder.getAll("page", {
+        fields: "id,data.url,name",
+        options: { noTargeting: true },
+    });
+
+    const items = content.map((item: any) => ({
+        id: item.id,
+        name: item.name,
+        href: item.data.url,
+        type: "page"
+      }));
+
+    return items;
+};
+
+
+const DEFAULT_MODEL_CONTENT_INSTANCES: ModelInstance[] = await fetchInstancesByModel("page");
+
 
 const ComplexLink: React.FC<ComplexLinkProps> = ({ value, onChange, defaultType = 'url' }) => {
 

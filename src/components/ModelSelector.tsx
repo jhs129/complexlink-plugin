@@ -1,6 +1,7 @@
 import React, { useState, ChangeEvent } from 'react';
 import { styles } from './ComplexLink.styles';
 import { ModelInstance } from '../types';
+import { builder } from '@builder.io/react';
 
 interface ModelSelectorProps {
   href: string;
@@ -8,6 +9,26 @@ interface ModelSelectorProps {
   instances: ModelInstance[];
   onModelSelect: (instance: ModelInstance) => void;
 }
+
+builder.init("9d9c17771b684627bed7d61d5f05ef44");
+
+
+const fetchInstancesByModel = async (type: string): Promise<ModelInstance[]> => {
+
+    const content = await builder.getAll(type, {
+        fields: "id,data.url,name",
+        options: { noTargeting: true },
+    });
+
+    const items = content.map((item: any) => ({
+        id: item.id,
+        name: item.name,
+        href: item.data.url,
+        type: type
+      }));
+
+    return items;
+};
 
 export const ModelSelector: React.FC<ModelSelectorProps> = ({
   href,
@@ -17,13 +38,20 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
 }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedModelType, setSelectedModelType] = useState<string>('');
+    const [instanceData, setInstanceData] = useState<ModelInstance[]>(instances);
     
-    const filteredInstances = instances.filter(
+    const filteredInstances = instanceData.filter(
         instance => instance.type === selectedModelType
     );
 
-    const handleModelTypeSelect = (e: ChangeEvent<HTMLSelectElement>) => {
-        setSelectedModelType(e.target.value);
+    const handleModelTypeSelect = async (e: ChangeEvent<HTMLSelectElement>) => {
+        const selectedType = e.target.value;
+        setSelectedModelType(selectedType);
+
+        if (selectedType) {
+            const fetchedInstances = await fetchInstancesByModel(selectedType);
+            setInstanceData(fetchedInstances);
+        }
     };
 
     const handleInstanceSelect = (e: ChangeEvent<HTMLSelectElement>) => {

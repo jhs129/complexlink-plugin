@@ -24,7 +24,7 @@ builder.init("9d9c17771b684627bed7d61d5f05ef44");
 
 const fetchInstancesByModel = async (type: string): Promise<ModelInstance[]> => {
     // let items = DEFAULT_MODEL_CONTENT_INSTANCES.filter(instance => instance.type === type);
-    const content = await builder.getAll("page", {
+    const content = await builder.getAll(type, {
         fields: "id,data.url,name",
         options: { noTargeting: true },
     });
@@ -33,15 +33,16 @@ const fetchInstancesByModel = async (type: string): Promise<ModelInstance[]> => 
         id: item.id,
         name: item.name,
         href: item.data.url,
-        type: "page"
+        type: type
       }));
 
     return items;
 };
 
+const pageInstances = await fetchInstancesByModel("page");
+const blogInstances = await fetchInstancesByModel("blog");
 
-const DEFAULT_MODEL_CONTENT_INSTANCES: ModelInstance[] = await fetchInstancesByModel("page");
-
+const DEFAULT_MODEL_CONTENT_INSTANCES: ModelInstance[] = [...pageInstances, ...blogInstances];
 
 const ComplexLink: React.FC<ComplexLinkProps> = ({ value, onChange, defaultType = 'url' }) => {
 

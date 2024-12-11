@@ -1,69 +1,63 @@
-import React, { useState, ChangeEvent } from 'react';
+import React, { useState, ChangeEvent, useCallback } from 'react';
 import { styles } from './ComplexLink.styles';
 import { ModelInstance } from '../types';
 import { builder } from '@builder.io/react';
 
 interface ModelSelectorProps {
-  href: string;
-  referenceId: string;
-  instances: ModelInstance[];
-  onModelSelect: (instance: ModelInstance) => void;
+    href: string;
+    referenceId: string;
+    onModelSelect: (instance: ModelInstance) => void;
 }
+
+const MODEL_TYPES = {
+    PAGE: 'page',
+    BLOG: 'blog'
+} as const;
 
 builder.init("9d9c17771b684627bed7d61d5f05ef44");
 
-
-const fetchInstancesByModel = async (type: string): Promise<ModelInstance[]> => {
-    try {
-        const content = await builder.getAll(type, {
-            fields: "id,data.url,name",
-            options: { noTargeting: true },
-        });
-
-        const items = content.map((item: any) => ({
-            id: item.id || '',
-            name: item.name || '',
-            href: (item?.data?.url) || `/${type}/${item.name || ''}`,
-            type: type
-        }));
-
-        return items;
-    } catch (error) {
-        console.error(`Error fetching ${type} instances:`, error);
-        return [];
-    }
-};
-
-export const ModelSelector: React.FC<ModelSelectorProps> = ({
-  href,
-  referenceId,
-  instances,
-  onModelSelect
+const ModelSelector: React.FC<ModelSelectorProps> = ({
+    href,
+    referenceId,
+    onModelSelect
 }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedModelType, setSelectedModelType] = useState<string>('');
-    const [instanceData, setInstanceData] = useState<ModelInstance[]>(instances);
-    
-    const filteredInstances = instanceData.filter(
-        instance => instance.type === selectedModelType
-    );
+    const [instances, setInstances] = useState<ModelInstance[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
 
-    const handleModelTypeSelect = async (e: ChangeEvent<HTMLSelectElement>) => {
-        const selectedType = e.target.value;
-        setSelectedModelType(selectedType);
+    const fetchInstances = useCallback(async (type: string) => {
+        setIsLoading(true);
+        try {
+            const content = await builder.getAll(type, {
+                fields: "id,data.url,name",
+                options: { noTargeting: true },
+            });
 
-        if (selectedType) {
-            const fetchedInstances = await fetchInstancesByModel(selectedType);
-            setInstanceData(fetchedInstances);
+            setInstances(content.map((item: any) => ({
+                id: item.id || '',
+                name: item.name || '',
+                href: item?.data?.url || `/${type}/${item.name || ''}`,
+                type
+            })));
+        } catch (error) {
+            console.error(`Error fetching ${type} instances:`, error);
+            setInstances([]);
+        } finally {
+            setIsLoading(false);
         }
+    }, []);
+
+    const handleModelTypeChange = (e: ChangeEvent<HTMLSelectElement>) => {
+        const type = e.target.value;
+        setSelectedModelType(type);
+        if (type) fetchInstances(type);
     };
 
     const handleInstanceSelect = (e: ChangeEvent<HTMLSelectElement>) => {
-        const selectedId = e.target.value;
-        const selectedInstance = instances.find(instance => instance.id === selectedId);
-        
-        if (selectedInstance) {
-            onModelSelect(selectedInstance);
+        const instance = instances.find(i => i.id === e.target.value);
+        if (instance) {
+            onModelSelect(instance);
             setIsModalOpen(false);
         }
     };
@@ -71,7 +65,7 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
     return (
         <>
             <div style={styles.formRow}>
-                <label htmlFor="modelSelector">Select Model:</label>
+                <label htmlFor="modelSelector">Selected Model:</label>
                 <div style={styles.modelInputGroup}>
                     <input 
                         id="modelSelector" 
@@ -93,43 +87,46 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
             {isModalOpen && (
                 <div style={styles.modalOverlay}>
                     <div style={styles.modalContent}>
-                        <button 
-                            onClick={() => setIsModalOpen(false)}
-                            style={styles.closeButton}
-                        >
-                            x
-                        </button>
-                        <h2>Select Model</h2>
+                        <header style={styles.modalHeader}>
+                            <h2>Select Model</h2>
+                            <button 
+                                onClick={() => setIsModalOpen(false)}
+                                style={styles.closeButton}
+                            >
+                                ×
+                            </button>
+                        </header>
+
                         <div style={styles.modalForm}>
-                            <div style={styles.modalField}>
-                                <label>Model Type:</label>
+                            <select
+                                style={styles.modelSelect}
+                                value={selectedModelType}
+                                onChange={handleModelTypeChange}
+                            >
+                                <option value="">Select a model type...</option>
+                                {Object.entries(MODEL_TYPES).map(([key, value]) => (
+                                    <option key={value} value={value}>
+                                        {key.charAt(0) + key.slice(1).toLowerCase()}
+                                    </option>
+                                ))}
+                            </select>
+
+                            {selectedModelType && (
                                 <select
                                     style={styles.modelSelect}
-                                    value={selectedModelType}
-                                    onChange={handleModelTypeSelect}
+                                    onChange={handleInstanceSelect}
+                                    value={referenceId}
+                                    disabled={isLoading}
                                 >
-                                    <option value="">Select a model type...</option>
-                                    <option value="page">Page</option>
-                                    <option value="blog">Blog</option>
+                                    <option value="">
+                                        {isLoading ? 'Loading...' : 'Select an instance...'}
+                                    </option>
+                                    {instances.map(instance => (
+                                        <option key={instance.id} value={instance.id}>
+                                            {instance.name}
+                                        </option>
+                                    ))}
                                 </select>
-                            </div>
-                            
-                            {selectedModelType && (
-                                <div style={styles.modalField}>
-                                    <label>Select Instance:</label>
-                                    <select
-                                        style={styles.modelSelect}
-                                        onChange={handleInstanceSelect}
-                                        value={referenceId || ''}
-                                    >
-                                        <option value="">Select an instance...</option>
-                                        {filteredInstances.map(instance => (
-                                            <option key={instance.id} value={instance.id}>
-                                                {instance.name}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
                             )}
                         </div>
                     </div>

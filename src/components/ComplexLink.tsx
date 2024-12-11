@@ -4,47 +4,40 @@ import { ComplexLinkProps, ModelInstance } from '../types';
 import { ModelSelector } from './ModelSelector';
 import { builder } from '@builder.io/react';
 
-// Move this to a separate constants file if needed
-const DEFAULT_MODEL_CONTENT_INSTANCES_OLD: ModelInstance[] = [
+// Keep the old instances as fallback data
+const DEFAULT_MODEL_CONTENT_INSTANCES: ModelInstance[] = [
     // Page instances
-    { id: 'page_1', href: '/pages/home', name: 'Home Page', type: 'page' },
-    { id: 'page_2', href: '/pages/about', name: 'About Us', type: 'page' },
-    { id: 'page_3', href: '/pages/services', name: 'Our Services', type: 'page' },
-    { id: 'page_4', href: '/pages/contact', name: 'Contact Us', type: 'page' },
-    
+    { id: 'page_1', href: '/null/page', name: 'Sample Page', type: 'page' },
+
     // Blog instances
-    { id: 'blog_1', href: '/blog/getting-started', name: 'Getting Started Guide', type: 'blog' },
-    { id: 'blog_2', href: '/blog/best-practices', name: 'Development Best Practices', type: 'blog' },
-    { id: 'blog_3', href: '/blog/case-studies', name: 'Customer Success Stories', type: 'blog' },
-    { id: 'blog_4', href: '/blog/tech-trends', name: 'Latest Tech Trends', type: 'blog' }
+    { id: 'blog_1', href: '/null/blog', name: 'Sample Blog', type: 'blog' },
 ];
 
 builder.init("9d9c17771b684627bed7d61d5f05ef44");
 
-
 const fetchInstancesByModel = async (type: string): Promise<ModelInstance[]> => {
-    // let items = DEFAULT_MODEL_CONTENT_INSTANCES.filter(instance => instance.type === type);
-    const content = await builder.getAll(type, {
-        fields: "id,data.url,name",
-        options: { noTargeting: true },
-    });
+    try {
+        const content = await builder.getAll(type, {
+            fields: "id,data.url,name",
+            options: { noTargeting: true },
+        });
 
-    const items = content.map((item: any) => ({
-        id: item.id,
-        name: item.name,
-        href: item.data.url,
-        type: type
-      }));
-
-    return items;
+        return content.map((item: any) => ({
+            id: item.id,
+            name: item.name,
+            href: (item?.data && item.data?.url) || `/${type}/${item.name}`,
+            type: type
+        }));
+    } catch (error) {
+        console.error(`Error fetching ${type} instances:`, error);
+        // Return filtered static data as fallback
+        return DEFAULT_MODEL_CONTENT_INSTANCES.filter(instance => instance.type === type);
+    }
 };
 
-const pageInstances = await fetchInstancesByModel("page");
-const blogInstances = await fetchInstancesByModel("blog");
-
-const DEFAULT_MODEL_CONTENT_INSTANCES: ModelInstance[] = [...pageInstances, ...blogInstances];
-
 const ComplexLink: React.FC<ComplexLinkProps> = ({ value, onChange, defaultType = 'url' }) => {
+    // Add state for model instances
+    const [modelInstances, setModelInstances] = useState<ModelInstance[]>(DEFAULT_MODEL_CONTENT_INSTANCES);
 
     // Initialize state directly from value prop
     const [type, setType] = useState<string>(() => {
@@ -106,6 +99,22 @@ const ComplexLink: React.FC<ComplexLinkProps> = ({ value, onChange, defaultType 
             internalState: { type, href }
         }, null, 2));
     }, [value, type, href]);
+
+    // Fetch instances when component mounts
+    useEffect(() => {
+        const loadInstances = async () => {
+            try {
+                const pages = await fetchInstancesByModel("page");
+                const blogs = await fetchInstancesByModel("blog");
+                setModelInstances([...pages, ...blogs]);
+            } catch (error) {
+                console.error("Error loading model instances:", error);
+                // Fallback to static data is already handled in fetchInstancesByModel
+            }
+        };
+
+        loadInstances();
+    }, []);
 
     const handleTypeChange = (e: ChangeEvent<HTMLSelectElement>) => {
         const newType = e.target.value;
@@ -240,7 +249,7 @@ const ComplexLink: React.FC<ComplexLinkProps> = ({ value, onChange, defaultType 
                 <ModelSelector
                     href={href}
                     referenceId={referenceId}
-                    instances={DEFAULT_MODEL_CONTENT_INSTANCES}
+                    instances={modelInstances}
                     onModelSelect={handleModelInstanceSelect}
                 />
             )}

@@ -3,11 +3,12 @@ import { styles } from './ComplexLink.styles';
 import { ComplexLinkProps } from '../types';
 import ModelSelector from './ModelSelector';
 
+
 const ComplexLink: React.FC<ComplexLinkProps> = ({ value, onChange, defaultType = 'url' }) => {
     // Add debug logging to safeGet
-    const safeGet = (key: string, defaultValue: string = '') => {
+    const safeGet = (key: "type" | "href" | "model" | "referenceId", defaultValue: string = '') => {
         try {
-            const val = value.get(key) || defaultValue;
+            const val = value[key] || defaultValue;
             console.debug(`Getting ${key}:`, val);
             return val;
         } catch (error) {
